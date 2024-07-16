@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@Entity
 @NoArgsConstructor
 @Table(name = "shopping_cart")
 public class ShoppingCart {
