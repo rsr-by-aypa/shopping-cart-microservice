@@ -1,18 +1,28 @@
-FROM openjdk:17-jdk-slim as build
-WORKDIR /workspace/app
+# Verwende das offizielle OpenJDK 22-Image als Basis-Image
+FROM openjdk:17
 
-COPY mvnw .
+# Setze das Arbeitsverzeichnis auf /app
+WORKDIR /app
+
+# Kopiere die mvnw und die zugehörigen Dateien ins Image
+COPY mvnw ./
 COPY .mvn .mvn
-COPY pom.xml .
-COPY src src
+COPY pom.xml ./
 
-RUN ./mvnw install -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+# Konvertiere mvnw zu Unix-Zeilenendungen und mache sie ausführbar
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw && ls -l mvnw
 
-FROM openjdk:17-jdk-slim
-VOLUME /tmp
-ARG DEPENDENCY=/workspace/app/target/dependency
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.rsr.shopping_cart_microservice.ShoppingCartMicroserviceApplication"]
+# Installiere die Abhängigkeiten ohne die Quellcodes zu kopieren
+RUN ./mvnw dependency:resolve
+
+# Kopiere den Rest des Projekt-Quellcodes
+COPY src ./src
+
+# Baue die Anwendung und überspringe die Tests
+RUN ./mvnw package -DskipTests
+
+# Setze den Port, den die Anwendung nutzt
+EXPOSE 8080
+
+# Definiere den Einstiegspunkt, um die Anwendung zu starten
+ENTRYPOINT ["java", "-jar", "target/shopping-cart-microservice-0.0.1-SNAPSHOT.jar"]

@@ -13,11 +13,14 @@ public interface IShoppingCartService {
     void addItemToCart(UUID userId, UUID productId, int amount)
             throws NotEnoughInStockException, UnknownProductIdException;
 
-    void removeItemFromCart(UUID userId, UUID productId, int amount)
+    public void updateItemInCart(UUID userId, UUID productId, int newAmount);
+
+    void removeItemFromCart(UUID userId, UUID productId)
             throws UnknownProductIdException, IllegalAmountException;
 
     ShoppingCart getCartByUserId(UUID userid) throws NoCartException;
 
     void deleteCart(UUID userId) throws NoCartException;
 
+    public double calculateTotalPrice(UUID userId) throws NoCartException;
 }
