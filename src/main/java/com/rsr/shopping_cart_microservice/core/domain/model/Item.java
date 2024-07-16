@@ -9,7 +9,12 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@Table(name = "item")
 public class Item {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     private UUID productId;
 
@@ -22,11 +27,19 @@ public class Item {
     private String imageLink;
 
     public Item(UUID productId, String productName, double priceInEuro, int amount, String imageLink) {
+        this.id = UUID.randomUUID();
         this.productId = productId;
         this.productName = productName;
         this.priceInEuro = priceInEuro;
         this.amount = amount;
         this.imageLink = imageLink;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
     }
 
 }
