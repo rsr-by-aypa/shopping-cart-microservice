@@ -3,6 +3,7 @@ package com.rsr.shopping_cart_microservice.core.domain.service.impl;
 import com.rsr.shopping_cart_microservice.core.domain.model.Item;
 import com.rsr.shopping_cart_microservice.core.domain.model.Product;
 import com.rsr.shopping_cart_microservice.core.domain.model.ShoppingCart;
+import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IItemRepository;
 import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IProductRepository;
 import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IShoppingCartRepository;
 import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IShoppingCartService;
@@ -28,6 +29,9 @@ public class ShoppingCartService implements IShoppingCartService {
 
     @Autowired
     private IProductRepository productRepository;
+
+    @Autowired
+    private IItemRepository itemRepository;
 
     @Autowired
     private StockUpdateProducer stockUpdateProducer;
@@ -61,7 +65,8 @@ public class ShoppingCartService implements IShoppingCartService {
             existingItem.setAmount(existingItem.getAmount() + amount);
         } else {
             Item newItem = new Item(productId, product.getName(), product.getPriceInEuro(), amount, product.getImageLink());
-            cart.getItems().add(newItem);
+            Item persistedItem = itemRepository.save(newItem);
+            cart.getItems().add(persistedItem);
         }
 
         product.setNumberInStock(product.getNumberInStock() - amount);
