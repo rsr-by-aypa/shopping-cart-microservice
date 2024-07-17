@@ -35,7 +35,7 @@ public class ProductConsumer {
         }
     }
 
-    @RabbitListener(queues = "${product.updated.queue}")
+    @RabbitListener(queues = {"product.updated.queue"})
     public void handleProductUpdated(ProductDTO productDTO) {
         try {
             Product product = new Product(
