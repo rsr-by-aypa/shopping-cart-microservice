@@ -130,9 +130,10 @@ public class ShoppingCartService implements IShoppingCartService {
         }
         Product product = productOpt.get();
 
-        ShoppingCart cart = shoppingCartRepository.findById(userId)
-                .orElse(new ShoppingCart());
-        cart.setUserId(userId);
+        ShoppingCart cart = shoppingCartRepository.findByUserId(userId);
+        if (cart == null) {
+            cart = new ShoppingCart();
+        }
 
         Optional<Item> existingItemOpt = cart.getItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
@@ -145,7 +146,8 @@ public class ShoppingCartService implements IShoppingCartService {
             existingItem.setAmount(newAmount);
         } else {
             Item newItem = new Item(productId, product.getName(), product.getPriceInEuro(), newAmount, product.getImageLink());
-            cart.getItems().add(newItem);
+            Item persistedItem = itemRepository.save(newItem);
+            cart.getItems().add(persistedItem);
         }
 
         int amountDifference = newAmount - oldAmount;
