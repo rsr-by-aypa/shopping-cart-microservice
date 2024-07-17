@@ -12,6 +12,7 @@ import com.rsr.shopping_cart_microservice.utils.exceptions.NoCartException;
 import com.rsr.shopping_cart_microservice.utils.exceptions.NotEnoughInStockException;
 import com.rsr.shopping_cart_microservice.utils.exceptions.UnknownProductIdException;
 import com.rsr.shopping_cart_microservice.core.port.producer.StockUpdateProducer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class ShoppingCartService implements IShoppingCartService {
 
     @Autowired
@@ -42,13 +44,17 @@ public class ShoppingCartService implements IShoppingCartService {
             throw new NotEnoughInStockException(productId);
         }
 
-        ShoppingCart cart = shoppingCartRepository.findById(userId)
-                .orElse(new ShoppingCart());
+        ShoppingCart cart = shoppingCartRepository.findByUserId(userId);
+        if (cart == null) {
+            cart = new ShoppingCart();
+        }
         cart.setUserId(userId);
 
         Optional<Item> existingItemOpt = cart.getItems().stream()
                 .filter(item -> item.getProductId().equals(productId))
                 .findFirst();
+
+        log.info("Hier war ich");
 
         if (existingItemOpt.isPresent()) {
             Item existingItem = existingItemOpt.get();
