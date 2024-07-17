@@ -17,6 +17,7 @@ public class ProductService implements IProductService {
     @Autowired
     private IProductRepository productRepository;
 
+
     @Override
     public void addCreatedProduct(Product product) throws ProductIdAlreadyInUseException {
         if (productRepository.existsById(product.getId())) {
@@ -31,6 +32,10 @@ public class ProductService implements IProductService {
             throw new UnknownProductIdException();
         }
         productRepository.deleteById(productId);
+    }
+
+    public void updateProduct(Product product) {
+        productRepository.save(product);
     }
 
     @Override

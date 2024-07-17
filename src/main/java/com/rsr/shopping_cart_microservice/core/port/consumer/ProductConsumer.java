@@ -4,11 +4,9 @@ import com.rsr.shopping_cart_microservice.core.domain.model.Product;
 import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IProductService;
 import com.rsr.shopping_cart_microservice.core.port.dto.ProductDTO;
 import com.rsr.shopping_cart_microservice.utils.exceptions.ProductIdAlreadyInUseException;
-import com.rsr.shopping_cart_microservice.utils.exceptions.UnknownProductIdException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +19,7 @@ public class ProductConsumer {
     private IProductService productService;
 
     @RabbitListener(queues = {"product.created.queue"})
-    public void consumeCreated(ProductDTO productDTO) {
+    public void handleProductCreated(ProductDTO productDTO) {
         try {
             Product product = new Product(
                     productDTO.getId(),
@@ -38,11 +36,18 @@ public class ProductConsumer {
     }
 
     @RabbitListener(queues = {"product.updated.queue"})
-    public void consumeUpdated(ProductDTO productDTO) {
+    public void handleProductUpdated(ProductDTO productDTO) {
         try {
-            productService.changeProductNumberInStock(productDTO.getId(), productDTO.getNumberInStock());
+            Product product = new Product(
+                    productDTO.getId(),
+                    productDTO.getName(),
+                    productDTO.getPriceInEuro(),
+                    productDTO.getNumberInStock(),
+                    productDTO.getImageLink()
+            );
+            productService.updateProduct(product);
             LOGGER.info("Product updated: " + productDTO.toString());
-        } catch (UnknownProductIdException | IllegalArgumentException e) {
+        } catch (ProductIdAlreadyInUseException e) {
             LOGGER.error(e.getMessage(), e);
         }
     }

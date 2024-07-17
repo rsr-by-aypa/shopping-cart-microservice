@@ -48,6 +48,7 @@ public class ShoppingCartService implements IShoppingCartService {
             throw new NotEnoughInStockException(productId);
         }
 
+        //das hier in äußere methode auslagern?
         ShoppingCart cart = shoppingCartRepository.findByUserId(userId);
         if (cart == null) {
             cart = new ShoppingCart();
