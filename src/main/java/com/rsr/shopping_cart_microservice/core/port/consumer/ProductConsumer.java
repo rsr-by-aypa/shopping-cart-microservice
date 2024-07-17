@@ -18,7 +18,7 @@ public class ProductConsumer {
     @Autowired
     private IProductService productService;
 
-    @RabbitListener(queues = {"product.created.queue"})
+    @RabbitListener(queues = "${rabbitmq.product.created.queue.name}")
     public void handleProductCreated(ProductDTO productDTO) {
         try {
             Product product = new Product(
@@ -35,7 +35,7 @@ public class ProductConsumer {
         }
     }
 
-    @RabbitListener(queues = {"product.updated.queue"})
+    @RabbitListener(queues = "${rabbitmq.product.updated.queue.name}")
     public void handleProductUpdated(ProductDTO productDTO) {
         try {
             Product product = new Product(
