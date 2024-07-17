@@ -74,7 +74,7 @@ public class ShoppingCartService implements IShoppingCartService {
 
         shoppingCartRepository.save(cart);
 
-        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), amount);
+        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), -amount);
 //        productDTO.setId(product.getId());
 //        productDTO.setName(product.getName());
 //        productDTO.setPriceInEuro(product.getPriceInEuro());
