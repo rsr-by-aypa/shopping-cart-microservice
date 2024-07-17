@@ -14,4 +14,5 @@ public interface IProductService {
 
     void changeProductNumberInStock(UUID productId, int subtractFromAmount) throws UnknownProductIdException, IllegalArgumentException;
 
+    void updateProduct(Product product) throws ProductIdAlreadyInUseException;
 }
