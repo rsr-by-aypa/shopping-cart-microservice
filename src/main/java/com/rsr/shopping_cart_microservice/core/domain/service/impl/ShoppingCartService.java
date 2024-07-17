@@ -183,8 +183,10 @@ public class ShoppingCartService implements IShoppingCartService {
 
     @Override
     public void deleteCart(UUID userId) throws NoCartException {
-        ShoppingCart cart = shoppingCartRepository.findById(userId)
-                .orElseThrow(() -> new NoCartException(userId));
+        ShoppingCart cart = shoppingCartRepository.findByUserId(userId);
+        if (cart == null) {
+            throw new NoCartException(userId);
+        }
         shoppingCartRepository.delete(cart);
     }
 

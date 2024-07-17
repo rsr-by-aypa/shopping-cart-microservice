@@ -21,15 +21,30 @@ public class RabbitMQConfig {
     @Value("${spring.rabbitmq.exchange}")
     private String exchange;
 
+    @Value("${rabbitmq.product.created.queue.name}")
+    private String productCreatedQueue;
+
+    @Value("${rabbitmq.product.updated.queue.name}")
+    private String productUpdatedQueue;
+
+    @Value("${rabbitmq.order.created.queue.name}")
+    private String orderCreatedQueue;
+
+    @Value("${rabbitmq.order.created.binding_key}")
+    private String orderCreatedBindingKey;
+
     @Bean
     public Queue productCreatedQueue() {
-        return new Queue("product.created.queue");
+        return new Queue(productCreatedQueue);
     }
 
     @Bean
     public Queue productUpdatedQueue() {
-        return new Queue("product.updated.queue");
+        return new Queue(productUpdatedQueue);
     }
+
+    @Bean
+    public Queue orderCreatedQueue() { return new Queue(orderCreatedQueue); }
 
     @Bean
     public TopicExchange exchange() {
@@ -44,6 +59,14 @@ public class RabbitMQConfig {
     @Bean
     public Binding productUpdatedBinding() {
         return BindingBuilder.bind(productUpdatedQueue()).to(exchange()).with(productUpdatedBindingKey);
+    }
+
+    @Bean
+    public Binding orderCreatedBinding() {
+        return BindingBuilder
+                .bind(orderCreatedQueue())
+                .to(exchange())
+                .with(orderCreatedBindingKey);
     }
 
     @Bean
