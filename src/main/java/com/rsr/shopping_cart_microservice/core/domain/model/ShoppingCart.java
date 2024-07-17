@@ -21,10 +21,18 @@ public class ShoppingCart {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Item> items = new ArrayList<>();
 
+    @Column(unique = true)
     private UUID userId;
 
     public ShoppingCart(List<Item> items, UUID userId) {
         this.items = items;
         this.userId = userId;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (id == null) {
+            id = UUID.randomUUID();
+        }
     }
 }
