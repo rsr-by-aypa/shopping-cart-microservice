@@ -1,5 +1,6 @@
 package com.rsr.shopping_cart_microservice.core.port.producer;
 
+import com.rsr.shopping_cart_microservice.core.port.dto.ProductAmountChangedDTO;
 import com.rsr.shopping_cart_microservice.core.port.dto.ProductDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,8 @@ public class StockUpdateProducer {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void sendStockUpdate(ProductDTO productDTO) {
-        LOGGER.info("Sending stock update: " + productDTO.toString());
-        rabbitTemplate.convertAndSend(exchange, stockUpdateRoutingKey, productDTO);
+    public void sendStockUpdate(ProductAmountChangedDTO productAmountChangedDTO) {
+        LOGGER.info("Sending stock update: " + productAmountChangedDTO.toString());
+        rabbitTemplate.convertAndSend(exchange, stockUpdateRoutingKey, productAmountChangedDTO);
     }
 }

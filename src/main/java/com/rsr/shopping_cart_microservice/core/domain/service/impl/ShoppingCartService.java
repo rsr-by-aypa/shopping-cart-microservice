@@ -6,6 +6,7 @@ import com.rsr.shopping_cart_microservice.core.domain.model.ShoppingCart;
 import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IProductRepository;
 import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IShoppingCartRepository;
 import com.rsr.shopping_cart_microservice.core.domain.service.interfaces.IShoppingCartService;
+import com.rsr.shopping_cart_microservice.core.port.dto.ProductAmountChangedDTO;
 import com.rsr.shopping_cart_microservice.core.port.dto.ProductDTO;
 import com.rsr.shopping_cart_microservice.utils.exceptions.NoCartException;
 import com.rsr.shopping_cart_microservice.utils.exceptions.NotEnoughInStockException;
@@ -62,12 +63,12 @@ public class ShoppingCartService implements IShoppingCartService {
 
         shoppingCartRepository.save(cart);
 
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setId(product.getId());
-        productDTO.setName(product.getName());
-        productDTO.setPriceInEuro(product.getPriceInEuro());
-        productDTO.setNumberInStock(product.getNumberInStock());
-        productDTO.setImageLink(product.getImageLink());
+        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), amount);
+//        productDTO.setId(product.getId());
+//        productDTO.setName(product.getName());
+//        productDTO.setPriceInEuro(product.getPriceInEuro());
+//        productDTO.setNumberInStock(product.getNumberInStock());
+//        productDTO.setImageLink(product.getImageLink());
 
         stockUpdateProducer.sendStockUpdate(productDTO);
     }
@@ -99,12 +100,12 @@ public class ShoppingCartService implements IShoppingCartService {
 
         shoppingCartRepository.save(cart);
 
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setId(product.getId());
-        productDTO.setName(product.getName());
-        productDTO.setPriceInEuro(product.getPriceInEuro());
-        productDTO.setNumberInStock(product.getNumberInStock());
-        productDTO.setImageLink(product.getImageLink());
+        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), amount);
+//        productDTO.setId(product.getId());
+//        productDTO.setName(product.getName());
+//        productDTO.setPriceInEuro(product.getPriceInEuro());
+//        productDTO.setNumberInStock(product.getNumberInStock());
+//        productDTO.setImageLink(product.getImageLink());
 
         stockUpdateProducer.sendStockUpdate(productDTO);
     }
@@ -146,12 +147,12 @@ public class ShoppingCartService implements IShoppingCartService {
 
         shoppingCartRepository.save(cart);
 
-        ProductDTO productDTO = new ProductDTO();
-        productDTO.setId(product.getId());
-        productDTO.setName(product.getName());
-        productDTO.setPriceInEuro(product.getPriceInEuro());
-        productDTO.setNumberInStock(product.getNumberInStock());
-        productDTO.setImageLink(product.getImageLink());
+        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), -amountDifference);
+//        productDTO.setId(product.getId());
+//        productDTO.setName(product.getName());
+//        productDTO.setPriceInEuro(product.getPriceInEuro());
+//        productDTO.setNumberInStock(product.getNumberInStock());
+//        productDTO.setImageLink(product.getImageLink());
 
         stockUpdateProducer.sendStockUpdate(productDTO);
     }

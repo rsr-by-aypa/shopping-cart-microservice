@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/shopping-cart")
+@RequestMapping("/shopping-cart")
 public class ShoppingCartController {
 
     @Autowired
     private IShoppingCartService shoppingCartService;
 
-    @PostMapping("/{userId}/add")
+    @PostMapping("/add/{userId}")
     public ResponseEntity<String> addItemToCart(@PathVariable UUID userId, @RequestBody CartItemDTO cartItemDTO) {
         try {
             shoppingCartService.addItemToCart(userId, cartItemDTO.getProductId(), cartItemDTO.getAmount());
@@ -29,7 +29,7 @@ public class ShoppingCartController {
         }
     }
 
-    @PostMapping("/{userId}/update")
+    @PostMapping("/update/{userId}")
     public ResponseEntity<String> updateItemInCart(@PathVariable UUID userId, @RequestBody CartItemDTO cartItemDTO) {
         try {
             shoppingCartService.updateItemInCart(userId, cartItemDTO.getProductId(), cartItemDTO.getAmount());
@@ -39,7 +39,7 @@ public class ShoppingCartController {
         }
     }
 
-    @DeleteMapping("/{userId}/remove/{productId}")
+    @DeleteMapping("/remove/{productId}/{userId}")
     public ResponseEntity<String> removeItemFromCart(@PathVariable UUID userId, @PathVariable UUID productId) {
         try {
             shoppingCartService.removeItemFromCart(userId, productId);
@@ -69,7 +69,7 @@ public class ShoppingCartController {
         }
     }
 
-    @GetMapping("/{userId}/total")
+    @GetMapping("/total/{userId}")
     public ResponseEntity<Double> getTotalPrice(@PathVariable UUID userId) {
         try {
             double totalPrice = shoppingCartService.calculateTotalPrice(userId);
