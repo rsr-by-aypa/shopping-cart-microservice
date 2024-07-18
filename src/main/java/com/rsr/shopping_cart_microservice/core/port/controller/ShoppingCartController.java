@@ -25,6 +25,7 @@ public class ShoppingCartController {
             shoppingCartService.addItemToCart(userId, cartItemDTO.getProductId(), cartItemDTO.getAmount());
             return ResponseEntity.ok("Item added to cart");
         } catch (NotEnoughInStockException | UnknownProductIdException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -66,16 +67,6 @@ public class ShoppingCartController {
             return ResponseEntity.ok("Cart deleted");
         } catch (NoCartException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/total/{userId}")
-    public ResponseEntity<Double> getTotalPrice(@PathVariable UUID userId) {
-        try {
-            double totalPrice = shoppingCartService.calculateTotalPrice(userId);
-            return ResponseEntity.ok(totalPrice);
-        } catch (NoCartException e) {
-            return ResponseEntity.badRequest().body(null);
         }
     }
 }
