@@ -39,6 +39,7 @@ public class ShoppingCartService implements IShoppingCartService {
     @Override
     public void addItemToCart(UUID userId, UUID productId, int amount)
             throws NotEnoughInStockException, UnknownProductIdException {
+
         Optional<Product> productOpt = productRepository.findById(productId);
         if (!productOpt.isPresent()) {
             throw new UnknownProductIdException();
@@ -48,18 +49,15 @@ public class ShoppingCartService implements IShoppingCartService {
             throw new NotEnoughInStockException(productId);
         }
 
-        //das hier in äußere methode auslagern?
-        ShoppingCart cart = shoppingCartRepository.findByUserId(userId);
-        if (cart == null) {
+        ShoppingCart cart;
+        try {
+            cart = getCartByUserId(userId);
+        } catch (NoCartException e) {
             cart = new ShoppingCart();
+            cart.setUserId(userId);
         }
-        cart.setUserId(userId);
 
-        Optional<Item> existingItemOpt = cart.getItems().stream()
-                .filter(item -> item.getProductId().equals(productId))
-                .findFirst();
-
-        log.info("Hier war ich");
+        Optional<Item> existingItemOpt = findItemInCartByProductId(productId, cart);
 
         if (existingItemOpt.isPresent()) {
             Item existingItem = existingItemOpt.get();
@@ -70,30 +68,19 @@ public class ShoppingCartService implements IShoppingCartService {
             cart.getItems().add(persistedItem);
         }
 
-        product.setNumberInStock(product.getNumberInStock() - amount);
-        productRepository.save(product);
+        changeNumberInStock(product, -amount);
 
         shoppingCartRepository.save(cart);
-
-        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), -amount);
-//        productDTO.setId(product.getId());
-//        productDTO.setName(product.getName());
-//        productDTO.setPriceInEuro(product.getPriceInEuro());
-//        productDTO.setNumberInStock(product.getNumberInStock());
-//        productDTO.setImageLink(product.getImageLink());
-
-        stockUpdateProducer.sendStockUpdate(productDTO);
     }
 
     @Override
     public void removeItemFromCart(UUID userId, UUID productId)
             throws UnknownProductIdException, NoCartException {
-        ShoppingCart cart = shoppingCartRepository.findById(userId)
-                .orElseThrow(() -> new NoCartException(userId));
 
-        Optional<Item> existingItemOpt = cart.getItems().stream()
-                .filter(item -> item.getProductId().equals(productId))
-                .findFirst();
+        System.out.println("Mal schauen...");
+        ShoppingCart cart = getCartByUserId(userId);
+        System.out.println("Bis hierhin");
+        Optional<Item> existingItemOpt = findItemInCartByProductId(productId, cart);
 
         if (!existingItemOpt.isPresent()) {
             throw new UnknownProductIdException();
@@ -107,19 +94,9 @@ public class ShoppingCartService implements IShoppingCartService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new UnknownProductIdException());
 
-        product.setNumberInStock(product.getNumberInStock() + amount);
-        productRepository.save(product);
+        changeNumberInStock(product, amount);
 
         shoppingCartRepository.save(cart);
-
-        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), amount);
-//        productDTO.setId(product.getId());
-//        productDTO.setName(product.getName());
-//        productDTO.setPriceInEuro(product.getPriceInEuro());
-//        productDTO.setNumberInStock(product.getNumberInStock());
-//        productDTO.setImageLink(product.getImageLink());
-
-        stockUpdateProducer.sendStockUpdate(productDTO);
     }
 
     @Override
@@ -131,14 +108,9 @@ public class ShoppingCartService implements IShoppingCartService {
         }
         Product product = productOpt.get();
 
-        ShoppingCart cart = shoppingCartRepository.findByUserId(userId);
-        if (cart == null) {
-            cart = new ShoppingCart();
-        }
+        ShoppingCart cart = getCartByUserId(userId);
 
-        Optional<Item> existingItemOpt = cart.getItems().stream()
-                .filter(item -> item.getProductId().equals(productId))
-                .findFirst();
+        Optional<Item> existingItemOpt = findItemInCartByProductId(productId, cart);
 
         int oldAmount = 0;
         if (existingItemOpt.isPresent()) {
@@ -156,18 +128,16 @@ public class ShoppingCartService implements IShoppingCartService {
             throw new NotEnoughInStockException(productId);
         }
 
+        changeNumberInStock(product, -amountDifference);
+
+        shoppingCartRepository.save(cart);
+    }
+
+    private void changeNumberInStock(Product product, int amountDifference) {
         product.setNumberInStock(product.getNumberInStock() - amountDifference);
         productRepository.save(product);
 
-        shoppingCartRepository.save(cart);
-
-        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), -amountDifference);
-//        productDTO.setId(product.getId());
-//        productDTO.setName(product.getName());
-//        productDTO.setPriceInEuro(product.getPriceInEuro());
-//        productDTO.setNumberInStock(product.getNumberInStock());
-//        productDTO.setImageLink(product.getImageLink());
-
+        ProductAmountChangedDTO productDTO = new ProductAmountChangedDTO(product.getId(), amountDifference);
         stockUpdateProducer.sendStockUpdate(productDTO);
     }
 
@@ -178,7 +148,6 @@ public class ShoppingCartService implements IShoppingCartService {
             throw new NoCartException(userId);
         }
         return cart;
-
     }
 
     @Override
@@ -198,5 +167,11 @@ public class ShoppingCartService implements IShoppingCartService {
         return cart.getItems().stream()
                 .mapToDouble(item -> item.getPriceInEuro() * item.getAmount())
                 .sum();
+    }
+
+    private Optional<Item> findItemInCartByProductId(UUID productId, ShoppingCart cart) {
+        return cart.getItems().stream()
+                .filter(item -> item.getProductId().equals(productId))
+                .findFirst();
     }
 }
